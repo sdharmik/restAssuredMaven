@@ -1,4 +1,4 @@
-package com.test.restAssured.satc;
+package com.test.restAssured.device;
 
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -11,6 +11,8 @@ import java.sql.Date;
 import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.test.restAssured.BaseTest;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

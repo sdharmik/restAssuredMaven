@@ -1,4 +1,4 @@
-package com.test.restAssured.satc;
+package com.test.restAssured;
 
 import static org.hamcrest.CoreMatchers.containsString;
 
