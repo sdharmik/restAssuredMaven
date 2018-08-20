@@ -2,27 +2,23 @@ package com.test.restAssured.device;
 
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.isA;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import java.sql.Date;
+import static org.hamcrest.CoreMatchers.equalTo;
 
 import org.apache.http.HttpStatus;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.test.restAssured.BaseTest;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 
 public class DeviceTest extends BaseTest{
 
-	@Before
-	public void setUp(){
-		super.setUp();
+	@BeforeClass
+	public static void init(){
+		RestAssured.baseURI = "http://10.49.65.12:8080";
 		RestAssured.basePath = "/deviceServices/api/v1";
 	}
 	
@@ -35,58 +31,15 @@ public class DeviceTest extends BaseTest{
 				header(apiKey).
 				param("serviceTag", "125PTF1").param("retailInfo", "true")
 				.when().request("PUT", "/assets")
-				.then().log().body().statusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
+				.then().log().body()
+				.assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR).and()
+				.assertThat().body("code", equalTo("1110"),"message", containsString("not supported"));
 	}
 
+	@AfterClass
+	public static void cleanUp(){
+		RestAssured.basePath = null;
+		RestAssured.baseURI = null;
+	}
 	
-	@Test
-	public void testGetAssetByServiceTag(){
-
-		Header apiKey = new Header("SupportAssist-API-Key", "65D3F3B736924DF1B609F27D660B3109");
-		RestAssured.
-				given().
-				header(apiKey).
-				param("serviceTag", "9JtY104").param("retailInfo", "false")
-				.when().request("GET", "/assets")
-				.then().log().body().statusCode(HttpStatus.SC_OK).and().contentType(ContentType.JSON).and().
-				body("find {it.serviceTag == '9JTY104'}.retailInfo",  nullValue())
-				.body("find {it.serviceTag == '9JTY104'}.localChannel",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.companyNumber",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.productLOB",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.shippedDate",  isA(Date.class) )
-//				.bo
-				.and().header("Cache-control", containsString("no-cache"))
-				.header("Pragma", containsString("no-cache"));
-				
-	}
-
-	@Test
-	public void testGetAssetByServiceTag_withRetailInfo(){
-
-		Header apiKey = new Header("SupportAssist-API-Key", "65D3F3B736924DF1B609F27D660B3109");
-		RestAssured.
-				given().
-				header(apiKey).
-				param("serviceTag", "9JtY104").param("retailInfo", "true")
-				.when().request("GET", "/assets")
-				.then().statusCode(HttpStatus.SC_OK).and().contentType(ContentType.JSON).and().
-				body("find {it.serviceTag == '9JTY104'}.retailInfo",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.localChannel",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.companyNumber",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.productLOB",  notNullValue())
-				.body("find {it.serviceTag == '9JTY104'}.shippedDate",  notNullValue());
-//				.bo
-				//.and().header("Cache-control", "no-cache");
-				
-	}
-
-	@Test
-	public void testGetAssetByServiceTag_noHeader(){
-		RestAssured.
-				given().
-				param("serviceTag", "125PTF1").param("retailInfo", "true")
-				.when().request("GET", "/assets")
-				.then().statusCode(HttpStatus.SC_UNAUTHORIZED).and().contentType(ContentType.JSON);
-	}
-
 }
